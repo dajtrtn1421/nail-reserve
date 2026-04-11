@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ネイルサロン予約</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+      background: #fdf6f9;
+      color: #333;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    .header {
+      background: #c97a96;
+      color: white;
+      text-align: center;
+      padding: 26px 20px 20px;
+    }
+    .header h1 { font-size: 19px; font-weight: bold; letter-spacing: 0.05em; }
+    .header p  { font-size: 12px; margin-top: 6px; opacity: 0.88; }
+
+    .form-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 18px 0;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #c97a96;
+      border-left: 4px solid #c97a96;
+      padding-left: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 7px;
+    }
+    .field label .req {
+      color: #c0516c;
+      margin-left: 4px;
+      font-size: 11px;
+      font-weight: normal;
+    }
+
+    /* カレンダー */
+    .calendar-card {
+      background: white;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cal-nav button {
+      background: none;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #c97a96;
+      line-height: 1;
+    }
+    .cal-nav span {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+      padding: 4px 0;
+    }
+    .cal-dow.sun { color: #e05060; }
+    .cal-dow.sat { color: #5080d0; }
+    .cal-day {
+      text-align: center;
+      padding: 7px 2px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: default;
+      line-height: 1;
+    }
+    .cal-day.empty { visibility: hidden; }
+    .cal-day.available {
+      cursor: pointer;
+      background: #fdf0f4;
+      color: #c97a96;
+      font-weight: bold;
+      border: 1.5px solid #e8ccd6;
+    }
+    .cal-day.available:hover { background: #f5d8e5; }
+    .cal-day.unavailable {
+      color: #ddd;
+      text-decoration: line-through;
+      font-size: 13px;
+    }
+    .cal-day.selected-1 {
+      background: #c97a96 !important;
+      color: white !important;
+      border-color: #c97a96 !important;
+    }
+    .cal-day.selected-2 {
+      background: #e8a0bc !important;
+      color: white !important;
+      border-color: #e8a0bc !important;
+    }
+    .cal-legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: #888;
+      justify-content: flex-end;
+    }
+    .cal-legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-1 { background: #c97a96; }
+    .dot-2 { background: #e8a0bc; }
+
+    /* 選択済み表示 */
+    .selected-display {
+      background: white;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+    .pref-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 0;
+    }
+    .pref-row + .pref-row { border-top: 1px solid #f0e0ea; }
+    .pref-badge {
+      font-size: 11px;
+      font-weight: bold;
+      background: #c97a96;
+      color: white;
+      border-radius: 4px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pref-badge.second { background: #e8a0bc; }
+    .pref-detail { flex: 1; }
+    .pref-date { font-weight: bold; color: #333; font-size: 13px; margin-bottom: 6px; }
+    .pref-time { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .pref-time select {
+      padding: 5px 8px;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+      color: #333;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .pref-time-label { font-size: 12px; color: #888; }
+    .pref-remove {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 2px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .pref-empty { color: #bbb; font-size: 13px; padding: 4px 0; }
+
+    /* メニュー */
+    .menu-group { display: flex; gap: 10px; }
+    .menu-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: white;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 10px;
+      padding: 14px 10px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #555;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .menu-item input[type="radio"] { display: none; }
+    .menu-item.selected {
+      border-color: #c97a96;
+      background: #fdf0f4;
+      color: #c97a96;
+      font-weight: bold;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e8ccd6;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      background: white;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus { border-color: #c97a96; }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+    .error-msg {
+      color: #c0516c;
+      font-size: 12px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #c97a96;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      font-family: inherit;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 28px;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s;
+    }
+    .submit-btn:active { opacity: 0.82; }
+    .submit-btn:disabled { background: #ccc; cursor: default; }
+
+    .note {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 12px;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #c97a96;
+      font-size: 15px;
+    }
+
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 70px 30px;
+    }
+    .success-screen .icon { font-size: 54px; margin-bottom: 20px; }
+    .success-screen h2 { font-size: 20px; color: #c97a96; margin-bottom: 12px; }
+    .success-screen p { font-size: 14px; color: #666; line-height: 1.9; }
+
+    .divider { border: none; border-top: 1px solid #f0e0ea; margin: 22px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌸 ご予約フォーム</h1>
+  <p>ご希望の日時・メニューをお選びください</p>
+</div>
+
+<div id="loadingArea" class="loading">空き日を読み込み中…</div>
+
+<div class="form-wrap" id="formArea" style="display:none;">
+
+  <!-- お名前 -->
+  <div class="field">
+    <label>お名前<span class="req">必須</span></label>
+    <input type="text" id="name" placeholder="山田 花子" />
+    <div class="error-msg" id="err-name">お名前を入力してください</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 希望日時 -->
+  <div class="section-title">ご希望日時（第一・第二希望）</div>
+
+  <div class="selected-display" id="selectedDisplay">
+    <div class="pref-empty">カレンダーから希望日を2つ選んでください</div>
+  </div>
+
+  <div class="field">
+    <label>カレンダーから選択<span class="req">必須（2つ）</span></label>
+    <div class="calendar-card">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">&#8249;</button>
+        <span id="calTitle"></span>
+        <button onclick="changeMonth(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><span class="dot dot-1"></span>第一希望</span>
+        <span><span class="dot dot-2"></span>第二希望</span>
+      </div>
+    </div>
+    <div class="error-msg" id="err-date">第一・第二希望の日付を2つ選択してください</div>
+    <div class="error-msg" id="err-time">すべての希望日の時間を選択してください</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- メニュー -->
+  <div class="field">
+    <label>メニュー<span class="req">必須</span></label>
+    <div class="menu-group">
+      <label class="menu-item" id="menu-hand" onclick="selectMenu('hand')">
+        <input type="radio" name="menu" value="ハンド" />
+        ✋ ハンド
+      </label>
+      <label class="menu-item" id="menu-foot" onclick="selectMenu('foot')">
+        <input type="radio" name="menu" value="フット" />
+        🦶 フット
+      </label>
+    </div>
+    <div class="error-msg" id="err-menu">メニューを選択してください</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- その他ご要望 -->
+  <div class="field">
+    <label>その他ご要望</label>
+    <textarea id="note" placeholder="デザインのご希望・アレルギー等ありましたらお気軽にどうぞ"></textarea>
+  </div>
+
+  <button class="submit-btn" onclick="submitForm()">予約内容を送信する</button>
+  <p class="note">送信後、LINEのトーク画面に予約内容が表示されます。<br>サロンより確定のご連絡をお送りします。</p>
+
+</div>
+
+<div class="success-screen" id="successArea">
+  <div class="icon">🌸</div>
+  <h2>ご予約ありがとうございます</h2>
+  <p>予約内容をお送りしました。<br>サロンより確定のご連絡をお送りします。<br>しばらくお待ちください。</p>
+</div>
+
+<script>
+  /* ============================================================
+     ★ 設定欄：ここだけ書き換えてください
+  ============================================================ */
+  const LIFF_ID = "YOUR_LIFF_ID_HERE";        // ① LIFFアプリのLIFF ID
+  const GAS_URL = "YOUR_GAS_WEBAPP_URL_HERE"; // ② GASウェブアプリのURL
+  /* ============================================================ */
+
+  const HOURS = ["9","10","11","12","13","14","15","16","17","18"];
+  const MINS  = ["00","30"];
+  const DAYS  = ["日","月","火","水","木","金","土"];
+
+  let availableDates = [];
+  let currentYear, currentMonth;
+  let selections = []; // [{date, hour, minute}, ...] 最大2件
+
+  liff.init({ liffId: LIFF_ID })
+    .then(() => fetchAvailable())
+    .catch(() => fetchAvailable());
+
+  async function fetchAvailable() {
+    try {
+      const res  = await fetch(GAS_URL);
+      const data = await res.json();
+      availableDates = data.filter(d => d.available).map(d => d.date);
+    } catch(e) {
+      availableDates = [];
+    }
+    const today = new Date();
+    currentYear  = today.getFullYear();
+    currentMonth = today.getMonth();
+    renderCalendar();
+    document.getElementById("loadingArea").style.display = "none";
+    document.getElementById("formArea").style.display    = "block";
+  }
+
+  function renderCalendar() {
+    document.getElementById("calTitle").textContent =
+      `${currentYear}年 ${currentMonth + 1}月`;
+
+    const grid = document.getElementById("calGrid");
+    grid.innerHTML = "";
+
+    const dowClasses = ["sun","","","","","","sat"];
+    DAYS.forEach((d, i) => {
+      const el = document.createElement("div");
+      el.className = "cal-dow " + (dowClasses[i] || "");
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement("div");
+      el.className = "cal-day empty";
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(currentYear, currentMonth, d);
+      const dateStr = formatDate(dateObj);
+      const dow     = dateObj.getDay();
+      const isPast  = dateObj < today;
+      const isAvail = availableDates.includes(dateStr) && !isPast;
+
+      const el = document.createElement("div");
+      el.textContent = d;
+
+      const isSel1 = selections[0] && selections[0].date === dateStr;
+      const isSel2 = selections[1] && selections[1].date === dateStr;
+
+      if (isSel1) {
+        el.className = "cal-day available selected-1";
+        el.onclick = () => removeSelection(0);
+      } else if (isSel2) {
+        el.className = "cal-day available selected-2";
+        el.onclick = () => removeSelection(1);
+      } else if (isAvail) {
+        el.className = "cal-day available" +
+          (dow === 0 ? " sun-num" : dow === 6 ? " sat-num" : "");
+        el.onclick = () => selectDate(dateStr);
+      } else {
+        el.className = "cal-day unavailable";
+      }
+      grid.appendChild(el);
+    }
+  }
+
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+    renderCalendar();
+  }
+
+  function formatDate(d) {
+    const y   = d.getFullYear();
+    const m   = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function displayDate(dateStr) {
+    const [y, m, d] = dateStr.split("-");
+    const dow = DAYS[new Date(dateStr).getDay()];
+    return `${y}年${parseInt(m)}月${parseInt(d)}日（${dow}）`;
+  }
+
+  function selectDate(dateStr) {
+    if (selections.length >= 2) return;
+    selections.push({ date: dateStr, hour: "", minute: "" });
+    renderCalendar();
+    renderSelected();
+  }
+
+  function removeSelection(idx) {
+    selections.splice(idx, 1);
+    renderCalendar();
+    renderSelected();
+  }
+
+  function renderSelected() {
+    const area = document.getElementById("selectedDisplay");
+    area.innerHTML = "";
+
+    if (selections.length === 0) {
+      area.innerHTML = '<div class="pref-empty">カレンダーから希望日を2つ選んでください</div>';
+      return;
+    }
+
+    selections.forEach((sel, i) => {
+      const row = document.createElement("div");
+      row.className = "pref-row";
+
+      const badge = document.createElement("div");
+      badge.className = "pref-badge" + (i === 1 ? " second" : "");
+      badge.textContent = i === 0 ? "第一希望" : "第二希望";
+
+      const detail = document.createElement("div");
+      detail.className = "pref-detail";
+
+      const dateLabel = document.createElement("div");
+      dateLabel.className = "pref-date";
+      dateLabel.textContent = displayDate(sel.date);
+
+      const timeWrap = document.createElement("div");
+      timeWrap.className = "pref-time";
+
+      const tlabel = document.createElement("span");
+      tlabel.className = "pref-time-label";
+      tlabel.textContent = "ご希望時間：";
+
+      const hSel = document.createElement("select");
+      hSel.innerHTML = `<option value="">時</option>` +
+        HOURS.map(h => `<option value="${h}"${sel.hour===h?" selected":""}>${h}</option>`).join("");
+      hSel.onchange = e => { selections[i].hour = e.target.value; };
+
+      const colon = document.createTextNode(" : ");
+
+      const mSel = document.createElement("select");
+      mSel.innerHTML = `<option value="">分</option>` +
+        MINS.map(m => `<option value="${m}"${sel.minute===m?" selected":""}>${m}</option>`).join("");
+      mSel.onchange = e => { selections[i].minute = e.target.value; };
+
+      timeWrap.appendChild(tlabel);
+      timeWrap.appendChild(hSel);
+      timeWrap.appendChild(colon);
+      timeWrap.appendChild(mSel);
+
+      detail.appendChild(dateLabel);
+      detail.appendChild(timeWrap);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "pref-remove";
+      removeBtn.textContent = "×";
+      removeBtn.onclick = () => removeSelection(i);
+
+      row.appendChild(badge);
+      row.appendChild(detail);
+      row.appendChild(removeBtn);
+      area.appendChild(row);
+    });
+  }
+
+  function selectMenu(key) {
+    document.getElementById("menu-hand").classList.toggle("selected", key === "hand");
+    document.getElementById("menu-foot").classList.toggle("selected", key === "foot");
+    document.querySelector(`#menu-${key} input`).checked = true;
+  }
+
+  function showErr(id, show) {
+    document.getElementById(id).style.display = show ? "block" : "none";
+  }
+
+  async function submitForm() {
+    const name = document.getElementById("name").value.trim();
+    const menu = document.querySelector('input[name="menu"]:checked');
+    const note = document.getElementById("note").value.trim();
+    const timeOk = selections.length === 2 && selections.every(s => s.hour && s.minute);
+
+    showErr("err-name", !name);
+    showErr("err-date", selections.length < 2);
+    showErr("err-time", selections.length === 2 && !timeOk);
+    showErr("err-menu", !menu);
+
+    if (!name || selections.length < 2 || !timeOk || !menu) return;
+
+    const s1 = selections[0];
+    const s2 = selections[1];
+
+    const message =
+`【ネイルサロン予約申込】
+━━━━━━━━━━━━━━
+お名前：${name}
+メニュー：${menu.value}
+
+第一希望：${displayDate(s1.date)} ${s1.hour}:${s1.minute}
+第二希望：${displayDate(s2.date)} ${s2.hour}:${s2.minute}${note ? "\n\nご要望：" + note : ""}
+━━━━━━━━━━━━━━
+※サロンよりご確認のご連絡をお送りします`;
+
+    const btn = document.querySelector(".submit-btn");
+    btn.disabled = true;
+    btn.textContent = "送信中…";
+
+    try {
+      await liff.sendMessages([{ type: "text", text: message }]);
+      document.getElementById("formArea").style.display    = "none";
+      document.getElementById("successArea").style.display = "block";
+    } catch(err) {
+      console.error(err);
+      alert("送信に失敗しました。もう一度お試しください。");
+      btn.disabled = false;
+      btn.textContent = "予約内容を送信する";
+    }
+  }
+</script>
+</body>
+</html>
