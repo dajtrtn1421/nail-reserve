@@ -10,20 +10,42 @@
 
     body {
       font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
-      background: #fdf6f9;
+      background: #F3EDF4;
       color: #333;
       min-height: 100vh;
       padding-bottom: 48px;
     }
 
     .header {
-      background: #c97a96;
-      color: white;
+      background: #F3EDF4;
+      color: #692073;
       text-align: center;
-      padding: 26px 20px 20px;
+      border-top: 2px solid #692073;
+      padding: 0;
     }
-    .header h1 { font-size: 19px; font-weight: bold; letter-spacing: 0.05em; }
-    .header p  { font-size: 12px; margin-top: 6px; opacity: 0.88; }
+    .header-inner {
+      padding: 28px 20px 22px;
+    }
+    .header-logo {
+      display: block;
+      margin: 0 auto;
+      max-width: 70px;
+      width: 72%;
+      height: auto;
+    }
+    .header-tagline {
+      font-size: 12px;
+      margin-top: 14px;
+      color: #692073;
+      line-height: 1.65;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
+    .header-deco {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
 
     .form-wrap {
       max-width: 480px;
@@ -34,8 +56,8 @@
     .section-title {
       font-size: 15px;
       font-weight: bold;
-      color: #c97a96;
-      border-left: 4px solid #c97a96;
+      color: #692073;
+      border-left: 4px solid #692073;
       padding-left: 10px;
       margin-bottom: 14px;
     }
@@ -75,7 +97,7 @@
       padding: 4px 12px;
       font-size: 18px;
       cursor: pointer;
-      color: #c97a96;
+      color: #692073;
       line-height: 1;
     }
     .cal-nav span { font-size: 15px; font-weight: bold; color: #333; }
@@ -98,23 +120,24 @@
     .cal-day.empty { visibility: hidden; }
     .cal-day.available {
       cursor: pointer;
-      background: #fdf0f4;
-      color: #c97a96;
+      background: #ebe4ef;
+      color: #692073;
       font-weight: bold;
       border: 1.5px solid #e8ccd6;
     }
-    .cal-day.available:hover { background: #f5d8e5; }
-    .cal-day.available.disabled { cursor: default; background: #fdf0f4; opacity: 0.4; }
-    .cal-day.available.disabled:hover { background: #fdf0f4; }
-    .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }    .cal-day.selected-1 {
-      background: #c97a96 !important;
-      color: white !important;
-      border-color: #c97a96 !important;
+    .cal-day.available:hover { background: #dfd5ea; }
+    .cal-day.available.disabled { cursor: default; background: #ebe4ef; opacity: 0.4; }
+    .cal-day.available.disabled:hover { background: #ebe4ef; }
+    .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
+    .cal-day.selected-1 {
+      background: #692073 !important;
+      color: #ffffff !important;
+      border-color: #692073 !important;
     }
     .cal-day.selected-2 {
-      background: #e8a0bc !important;
-      color: white !important;
-      border-color: #e8a0bc !important;
+      background: #8e5c9e !important;
+      color: #ffffff !important;
+      border-color: #8e5c9e !important;
     }
     .cal-legend {
       display: flex;
@@ -126,8 +149,16 @@
     }
     .cal-legend span { display: flex; align-items: center; gap: 4px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot-1 { background: #c97a96; }
-    .dot-2 { background: #e8a0bc; }
+    .dot-1 { background: #692073; }
+    .dot-2 { background: #8e5c9e; }
+
+    .calendar-hint {
+      font-size: 13px;
+      color: #666;
+      margin: 0 0 14px;
+      line-height: 1.6;
+      font-weight: normal;
+    }
 
     .selected-display {
       background: white;
@@ -147,14 +178,14 @@
     .pref-badge {
       font-size: 11px;
       font-weight: bold;
-      background: #c97a96;
-      color: white;
+      background: #692073;
+      color: #ffffff;
       border-radius: 4px;
       padding: 2px 7px;
       flex-shrink: 0;
       margin-top: 2px;
     }
-    .pref-badge.second { background: #e8a0bc; }
+    .pref-badge.second { background: #8e5c9e; color: #ffffff; }
     .pref-detail { flex: 1; }
     .pref-date { font-weight: bold; color: #333; font-size: 13px; margin-bottom: 6px; }
     .pref-time { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
@@ -180,7 +211,6 @@
       flex-shrink: 0;
       line-height: 1;
     }
-    .pref-empty { color: #bbb; font-size: 13px; padding: 4px 0; }
 
     .menu-group { display: flex; gap: 10px; }
     .menu-item {
@@ -201,9 +231,9 @@
     }
     .menu-item input[type="radio"] { display: none; }
     .menu-item.selected {
-      border-color: #c97a96;
-      background: #fdf0f4;
-      color: #c97a96;
+      border-color: #692073;
+      background: #ebe4ef;
+      color: #692073;
       font-weight: bold;
     }
 
@@ -219,7 +249,7 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input[type="text"]:focus, textarea:focus { border-color: #c97a96; }
+    input[type="text"]:focus, textarea:focus { border-color: #692073; }
     textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
     .error-msg { color: #c0516c; font-size: 12px; margin-top: 6px; display: none; }
@@ -228,8 +258,8 @@
       display: block;
       width: 100%;
       padding: 16px;
-      background: #c97a96;
-      color: white;
+      background: #692073;
+      color: #ffffff;
       font-size: 17px;
       font-weight: bold;
       font-family: inherit;
@@ -251,7 +281,7 @@
       line-height: 1.7;
     }
 
-    .loading { text-align: center; padding: 60px 20px; color: #c97a96; font-size: 15px; }
+    .loading { text-align: center; padding: 60px 20px; color: #692073; font-size: 15px; }
 
     .success-screen {
       display: none;
@@ -259,7 +289,7 @@
       padding: 70px 30px;
     }
     .success-screen .icon { font-size: 54px; margin-bottom: 20px; }
-    .success-screen h2 { font-size: 20px; color: #c97a96; margin-bottom: 12px; }
+    .success-screen h2 { font-size: 20px; color: #692073; margin-bottom: 12px; }
     .success-screen p { font-size: 14px; color: #666; line-height: 1.9; }
 
     .divider { border: none; border-top: 1px solid #f0e0ea; margin: 22px 0; }
@@ -267,10 +297,13 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>🌸 ご予約フォーム</h1>
-  <p>ご希望の日時・メニューをお選びください</p>
-</div>
+<header class="header">
+  <div class="header-inner">
+    <img src="img/logo.png" alt="Nail Liberty" class="header-logo" decoding="async" />
+    <p class="header-tagline">ご希望の日時・メニューをお選びください</p>
+  </div>
+  <img src="img/deco.png" alt="" class="header-deco" role="presentation" decoding="async" />
+</header>
 
 <div id="loadingArea" class="loading">空き日を読み込み中…</div>
 
@@ -286,9 +319,8 @@
 
   <div class="section-title">ご希望日時（第一・第二希望）</div>
 
-  <div class="selected-display" id="selectedDisplay">
-    <div class="pref-empty">カレンダーから希望日を2つ選んでください</div>
-  </div>
+  <p class="calendar-hint" id="calendarHint">カレンダーから希望日を2つ選んでください</p>
+  <div class="selected-display" id="selectedDisplay" style="display: none;" aria-live="polite"></div>
 
   <div class="field">
     <label>カレンダーから選択<span class="req">必須（2つ）</span></label>
@@ -329,7 +361,8 @@
 
   <div class="field">
     <label>その他ご要望</label>
-    <textarea id="note" placeholder="デザインのご希望・アレルギー等ありましたらお気軽にどうぞ"></textarea>
+    <p class="calendar-hint">デザインのご要望（当日相談・画像お持ち込み等）や、お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。</p>
+    <textarea id="note"></textarea>
   </div>
 
   <button class="submit-btn" onclick="submitForm()">予約内容を送信する</button>
@@ -353,7 +386,7 @@
   /* ============================================================ */
 
   const HOURS = ["11","12","13","14","15","16","17"];
-  const MINS  = ["00","30"];
+  const MINS  = ["00","15","30","45"];
   const DAYS  = ["日","月","火","水","木","金","土"];
 
   let availableDates = [];
@@ -475,13 +508,18 @@
   }
 
   function renderSelected() {
+    const hint = document.getElementById("calendarHint");
     const area = document.getElementById("selectedDisplay");
     area.innerHTML = "";
 
     if (selections.length === 0) {
-      area.innerHTML = '<div class="pref-empty">カレンダーから希望日を2つ選んでください</div>';
+      hint.style.display = "block";
+      area.style.display = "none";
       return;
     }
+
+    hint.style.display = "none";
+    area.style.display = "block";
 
     selections.forEach((sel, i) => {
       const row = document.createElement("div");
@@ -564,7 +602,7 @@
     const s2 = selections[1];
 
     const message =
-`【ネイルサロン予約申込】
+`ご予約をリクエストしました💅
 ━━━━━━━━━━━━━━
 お名前：${name}
 メニュー：${menu.value}
@@ -572,7 +610,11 @@
 第一希望：${displayDate(s1.date)} ${s1.hour}:${s1.minute}
 第二希望：${displayDate(s2.date)} ${s2.hour}:${s2.minute}${note ? "\n\nご要望：" + note : ""}
 ━━━━━━━━━━━━━━
-※サロンよりご確認のご連絡をお送りします`;
+現時点で、ご予約はまだ確定していません。ご注意ください。
+ご予約確定についてはご連絡が入りますので、ご対応をお願いいたします。
+
+来店希望日の前日までにLibertyから連絡がない場合、お手数ですが直接お問い合わせください。
+`;
 
     const btn = document.querySelector(".submit-btn");
     btn.disabled = true;
