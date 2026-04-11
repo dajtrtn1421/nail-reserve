@@ -104,8 +104,9 @@
       border: 1.5px solid #e8ccd6;
     }
     .cal-day.available:hover { background: #f5d8e5; }
-    .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
-    .cal-day.selected-1 {
+    .cal-day.available.disabled { cursor: default; background: #fdf0f4; opacity: 0.4; }
+    .cal-day.available.disabled:hover { background: #fdf0f4; }
+    .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }    .cal-day.selected-1 {
       background: #c97a96 !important;
       color: white !important;
       border-color: #c97a96 !important;
@@ -399,6 +400,7 @@
     const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date(); today.setHours(0,0,0,0);
+    const minDate = new Date(today); minDate.setDate(today.getDate() + 2);
 
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement("div");
@@ -410,8 +412,9 @@
       const dateObj = new Date(currentYear, currentMonth, d);
       const dateStr = formatDate(dateObj);
       const dow     = dateObj.getDay();
-      const isPast  = dateObj < today;
+      const isPast  = dateObj < minDate;
       const isAvail = availableDates.includes(dateStr) && !isPast;
+      const isFull  = selections.length >= 2;
 
       const el = document.createElement("div");
       el.textContent = d;
@@ -425,10 +428,12 @@
       } else if (isSel2) {
         el.className = "cal-day available selected-2";
         el.onclick = () => removeSelection(1);
-      } else if (isAvail) {
+      } else if (isAvail && !isFull) {
         el.className = "cal-day available" +
           (dow === 0 ? " sun-num" : dow === 6 ? " sat-num" : "");
         el.onclick = () => selectDate(dateStr);
+      } else if (isAvail && isFull) {
+        el.className = "cal-day available disabled";
       } else {
         el.className = "cal-day unavailable";
       }
