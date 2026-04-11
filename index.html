@@ -55,7 +55,6 @@
       font-weight: normal;
     }
 
-    /* カレンダー */
     .calendar-card {
       background: white;
       border: 1.5px solid #e8ccd6;
@@ -79,22 +78,13 @@
       color: #c97a96;
       line-height: 1;
     }
-    .cal-nav span {
-      font-size: 15px;
-      font-weight: bold;
-      color: #333;
-    }
+    .cal-nav span { font-size: 15px; font-weight: bold; color: #333; }
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
     }
-    .cal-dow {
-      text-align: center;
-      font-size: 11px;
-      color: #999;
-      padding: 4px 0;
-    }
+    .cal-dow { text-align: center; font-size: 11px; color: #999; padding: 4px 0; }
     .cal-dow.sun { color: #e05060; }
     .cal-dow.sat { color: #5080d0; }
     .cal-day {
@@ -114,11 +104,7 @@
       border: 1.5px solid #e8ccd6;
     }
     .cal-day.available:hover { background: #f5d8e5; }
-    .cal-day.unavailable {
-      color: #ddd;
-      text-decoration: line-through;
-      font-size: 13px;
-    }
+    .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
     .cal-day.selected-1 {
       background: #c97a96 !important;
       color: white !important;
@@ -142,7 +128,6 @@
     .dot-1 { background: #c97a96; }
     .dot-2 { background: #e8a0bc; }
 
-    /* 選択済み表示 */
     .selected-display {
       background: white;
       border: 1.5px solid #e8ccd6;
@@ -196,7 +181,6 @@
     }
     .pref-empty { color: #bbb; font-size: 13px; padding: 4px 0; }
 
-    /* メニュー */
     .menu-group { display: flex; gap: 10px; }
     .menu-item {
       flex: 1;
@@ -237,12 +221,7 @@
     input[type="text"]:focus, textarea:focus { border-color: #c97a96; }
     textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
-    .error-msg {
-      color: #c0516c;
-      font-size: 12px;
-      margin-top: 6px;
-      display: none;
-    }
+    .error-msg { color: #c0516c; font-size: 12px; margin-top: 6px; display: none; }
 
     .submit-btn {
       display: block;
@@ -271,12 +250,7 @@
       line-height: 1.7;
     }
 
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: #c97a96;
-      font-size: 15px;
-    }
+    .loading { text-align: center; padding: 60px 20px; color: #c97a96; font-size: 15px; }
 
     .success-screen {
       display: none;
@@ -301,7 +275,6 @@
 
 <div class="form-wrap" id="formArea" style="display:none;">
 
-  <!-- お名前 -->
   <div class="field">
     <label>お名前<span class="req">必須</span></label>
     <input type="text" id="name" placeholder="山田 花子" />
@@ -310,7 +283,6 @@
 
   <hr class="divider">
 
-  <!-- 希望日時 -->
   <div class="section-title">ご希望日時（第一・第二希望）</div>
 
   <div class="selected-display" id="selectedDisplay">
@@ -337,7 +309,6 @@
 
   <hr class="divider">
 
-  <!-- メニュー -->
   <div class="field">
     <label>メニュー<span class="req">必須</span></label>
     <div class="menu-group">
@@ -355,7 +326,6 @@
 
   <hr class="divider">
 
-  <!-- その他ご要望 -->
   <div class="field">
     <label>その他ご要望</label>
     <textarea id="note" placeholder="デザインのご希望・アレルギー等ありましたらお気軽にどうぞ"></textarea>
@@ -374,10 +344,11 @@
 
 <script>
   /* ============================================================
-     ★ 設定欄：ここだけ書き換えてください
+     ★ 設定欄：ここだけ書き換えてください（3か所）
   ============================================================ */
-  const LIFF_ID = "YOUR_LIFF_ID_HERE";        // ① LIFFアプリのLIFF ID
-  const GAS_URL = "YOUR_GAS_WEBAPP_URL_HERE"; // ② GASウェブアプリのURL
+  const LIFF_ID      = "YOUR_LIFF_ID_HERE";        // ① LIFF ID
+  const GAS_URL      = "YOUR_GAS_WEBAPP_URL_HERE"; // ② GASウェブアプリURL
+  const SECRET_TOKEN = "nail-reserve-2024";         // ③ GASに設定したトークンと同じ文字列
   /* ============================================================ */
 
   const HOURS = ["9","10","11","12","13","14","15","16","17","18"];
@@ -386,7 +357,7 @@
 
   let availableDates = [];
   let currentYear, currentMonth;
-  let selections = []; // [{date, hour, minute}, ...] 最大2件
+  let selections = [];
 
   liff.init({ liffId: LIFF_ID })
     .then(() => fetchAvailable())
@@ -394,9 +365,11 @@
 
   async function fetchAvailable() {
     try {
-      const res  = await fetch(GAS_URL);
+      const res  = await fetch(`${GAS_URL}?token=${SECRET_TOKEN}`);
       const data = await res.json();
-      availableDates = data.filter(d => d.available).map(d => d.date);
+      if (!data.error) {
+        availableDates = data.filter(d => d.available).map(d => d.date);
+      }
     } catch(e) {
       availableDates = [];
     }
@@ -570,9 +543,9 @@
   }
 
   async function submitForm() {
-    const name = document.getElementById("name").value.trim();
-    const menu = document.querySelector('input[name="menu"]:checked');
-    const note = document.getElementById("note").value.trim();
+    const name   = document.getElementById("name").value.trim();
+    const menu   = document.querySelector('input[name="menu"]:checked');
+    const note   = document.getElementById("note").value.trim();
     const timeOk = selections.length === 2 && selections.every(s => s.hour && s.minute);
 
     showErr("err-name", !name);
