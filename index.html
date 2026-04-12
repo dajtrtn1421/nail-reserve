@@ -23,9 +23,7 @@
       border-top: 2px solid #692073;
       padding: 0;
     }
-    .header-inner {
-      padding: 16px 22px;
-    }
+    .header-inner { padding: 16px 22px; }
     .header-logo {
       display: block;
       margin: 0 auto;
@@ -41,11 +39,7 @@
       font-weight: normal;
       letter-spacing: 0.02em;
     }
-    .header-deco {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
+    .header-deco { display: block; width: 100%; height: auto; }
 
     .form-wrap {
       max-width: 480px;
@@ -61,14 +55,9 @@
       padding-left: 10px;
       margin-bottom: 14px;
     }
-
-    .section-title .req{
-      font-size: 10px;
-    }
+    .section-title .req { font-size: 10px; }
 
     .field { margin-bottom: 32px; }
-
-
     .field label {
       display: block;
       font-size: 13px;
@@ -76,6 +65,7 @@
       color: #555;
       margin-bottom: 7px;
     }
+
     .calendar-card {
       background: white;
       border: 1.5px solid #e8ccd6;
@@ -117,25 +107,13 @@
       line-height: 1;
     }
     .cal-day.empty { visibility: hidden; }
-    .cal-day.available {
-      cursor: pointer;
-      color: #692073;
-      font-weight: bold;
-    }
+    .cal-day.available { cursor: pointer; color: #692073; font-weight: bold; }
     .cal-day.available:hover { background: #dfd5ea; }
     .cal-day.available.disabled { cursor: default; opacity: 0.4; }
     .cal-day.available.disabled:hover { background: #ebe4ef; }
     .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
-    .cal-day.selected-1 {
-      background: #692073 !important;
-      color: #ffffff !important;
-      border-color: #692073 !important;
-    }
-    .cal-day.selected-2 {
-      background: #8e5c9e !important;
-      color: #ffffff !important;
-      border-color: #8e5c9e !important;
-    }
+    .cal-day.selected-1 { background: #692073 !important; color: #ffffff !important; border-color: #692073 !important; }
+    .cal-day.selected-2 { background: #8e5c9e !important; color: #ffffff !important; border-color: #8e5c9e !important; }
     .cal-legend {
       display: flex;
       gap: 14px;
@@ -165,12 +143,7 @@
       margin-bottom: 14px;
       font-size: 13px;
     }
-    .pref-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 7px 0;
-    }
+    .pref-row { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; }
     .pref-row + .pref-row { border-top: 1px solid #f0e0ea; }
     .pref-badge {
       font-size: 11px;
@@ -209,7 +182,6 @@
       line-height: 1;
     }
 
-    .menu-group { display: flex; gap: 10px; }
     .menu-item {
       flex: 1;
       display: flex;
@@ -227,12 +199,7 @@
       user-select: none;
     }
     .menu-item input[type="radio"] { display: none; }
-    .menu-item.selected {
-      border-color: #692073;
-      background: #ebe4ef;
-      color: #692073;
-      font-weight: bold;
-    }
+    .menu-item.selected { border-color: #692073; background: #ebe4ef; color: #692073; font-weight: bold; }
 
     input[type="text"], textarea {
       width: 100%;
@@ -270,14 +237,6 @@
     .submit-btn:active { opacity: 0.82; }
     .submit-btn:disabled { background: #ccc; cursor: default; }
 
-    .note {
-      font-size: 11px;
-      color: #aaa;
-      margin-top: 12px;
-      text-align: center;
-      line-height: 1.7;
-    }
-
     .loading { text-align: center; padding: 60px 20px; color: #692073; font-size: 15px; }
 
     .success-screen {
@@ -310,8 +269,6 @@
     <div class="error-msg" id="err-name">お名前を入力してください</div>
   </div>
 
-
-
   <div class="section-title">ご希望日時（第一・第二希望）</div>
 
   <div class="field">
@@ -332,30 +289,30 @@
   </div>
 
   <p class="calendar-hint" id="calendarHint">希望日を選択すると、ここに表示されます</p>
-  <div class="selected-display" id="selectedDisplay" style="display: none;" aria-live="polite"></div>
-
-
+  <div class="selected-display" id="selectedDisplay" style="display:none;" aria-live="polite"></div>
 
   <div class="field">
     <div class="section-title">メニュー</div>
     <div class="menu-group">
       <label class="menu-item" id="menu-hand" onclick="selectMenu('hand')">
-        <input type="radio" name="menu" value="ハンド" />
-        ✋ ハンド
+        <input type="radio" name="menu" value="ハンドジェルネイル" />
+        ✋ ハンドジェルネイル ¥5,000〜
       </label>
       <label class="menu-item" id="menu-foot" onclick="selectMenu('foot')">
-        <input type="radio" name="menu" value="フット" />
-        🦶 フット
+        <input type="radio" name="menu" value="フットジェルネイル" />
+        🦶 フットジェルネイル ¥5,000〜
+      </label>
+      <label class="menu-item" id="menu-foot" onclick="selectMenu('care')">
+        <input type="radio" name="menu" value="ケア" />
+        ✨ ケア ¥3,000〜
       </label>
     </div>
     <div class="error-msg" id="err-menu">メニューを選択してください</div>
   </div>
 
-
-
   <div class="field">
     <div class="section-title">その他ご要望</div>
-    <p class="calendar-hint">デザインのご要望（当日相談・画像お持ち込み等）や、お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。</p>
+    <p class="calendar-hint">お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。<br>デザインのご指定ある方は1週間前までにLINE、DMなどでイメージ画像をお送りください。</p>
     <textarea id="note"></textarea>
   </div>
 
@@ -364,16 +321,16 @@
 
 <div class="success-screen" id="successArea">
   <h2>ご予約ありがとうございます</h2>
-  <p>予約リクエストをお送りしました。<br>サロンより確定のご連絡をお送りします。<br>しばらくお待ちください。</p>
+  <p>予約リクエストしました。<br>サロンより確定のご連絡をお送りします。<br>しばらくお待ちください。</p>
 </div>
 
 <script>
   /* ============================================================
      ★ 設定欄
   ============================================================ */
-  const LIFF_ID      = "2009771743-c79xDnFL";        // ① LIFF ID
-  const GAS_URL      = "https://script.google.com/macros/s/AKfycbwE-BnD4cA4DljiB64v0uoBV2JjaZnX-97aSV9ICAFfw9dQeX2_2X-WEl95SwtXqps/exec"; // ② GASウェブアプリURL（新デプロイ後は必ず更新）
-  const SECRET_TOKEN = "nail-reserve-2026";         // ③ nail-reserve-v2.gs の SECRET_TOKEN と同じ
+  const LIFF_ID      = "2009771743-c79xDnFL";
+  const GAS_URL      = "https://script.google.com/macros/s/AKfycbwE-BnD4cA4DljiB64v0uoBV2JjaZnX-97aSV9ICAFfw9dQeX2_2X-WEl95SwtXqps/exec";
+  const SECRET_TOKEN = "nail-reserve-2026";
   /* ============================================================ */
 
   async function appendReservationToSheet(payload) {
@@ -389,14 +346,8 @@
     });
     const text = await res.text();
     let json;
-    try {
-      json = JSON.parse(text);
-    } catch (e) {
-      throw new Error("invalid_response");
-    }
-    if (json.error) {
-      throw new Error(json.error);
-    }
+    try { json = JSON.parse(text); } catch (e) { throw new Error("invalid_response"); }
+    if (json.error) throw new Error(json.error);
   }
 
   const HOURS = ["11","12","13","14","15","16","17"];
@@ -418,9 +369,7 @@
       if (!data.error) {
         availableDates = data.filter(d => d.available).map(d => d.date);
       }
-    } catch(e) {
-      availableDates = [];
-    }
+    } catch(e) { availableDates = []; }
     const today = new Date();
     currentYear  = today.getFullYear();
     currentMonth = today.getMonth();
@@ -430,12 +379,9 @@
   }
 
   function renderCalendar() {
-    document.getElementById("calTitle").textContent =
-      `${currentYear}年 ${currentMonth + 1}月`;
-
+    document.getElementById("calTitle").textContent = `${currentYear}年 ${currentMonth + 1}月`;
     const grid = document.getElementById("calGrid");
     grid.innerHTML = "";
-
     const dowClasses = ["sun","","","","","","sat"];
     DAYS.forEach((d, i) => {
       const el = document.createElement("div");
@@ -443,18 +389,15 @@
       el.textContent = d;
       grid.appendChild(el);
     });
-
     const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date(); today.setHours(0,0,0,0);
     const minDate = new Date(today); minDate.setDate(today.getDate() + 2);
-
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement("div");
       el.className = "cal-day empty";
       grid.appendChild(el);
     }
-
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(currentYear, currentMonth, d);
       const dateStr = formatDate(dateObj);
@@ -462,13 +405,10 @@
       const isPast  = dateObj < minDate;
       const isAvail = availableDates.includes(dateStr) && !isPast;
       const isFull  = selections.length >= 2;
-
       const el = document.createElement("div");
       el.textContent = d;
-
       const isSel1 = selections[0] && selections[0].date === dateStr;
       const isSel2 = selections[1] && selections[1].date === dateStr;
-
       if (isSel1) {
         el.className = "cal-day available selected-1";
         el.onclick = () => removeSelection(0);
@@ -476,8 +416,7 @@
         el.className = "cal-day available selected-2";
         el.onclick = () => removeSelection(1);
       } else if (isAvail && !isFull) {
-        el.className = "cal-day available" +
-          (dow === 0 ? " sun-num" : dow === 6 ? " sat-num" : "");
+        el.className = "cal-day available" + (dow === 0 ? " sun-num" : dow === 6 ? " sat-num" : "");
         el.onclick = () => selectDate(dateStr);
       } else if (isAvail && isFull) {
         el.className = "cal-day available disabled";
@@ -525,63 +464,48 @@
     const hint = document.getElementById("calendarHint");
     const area = document.getElementById("selectedDisplay");
     area.innerHTML = "";
-
     if (selections.length === 0) {
       hint.style.display = "block";
       area.style.display = "none";
       return;
     }
-
     hint.style.display = "none";
     area.style.display = "block";
-
     selections.forEach((sel, i) => {
       const row = document.createElement("div");
       row.className = "pref-row";
-
       const badge = document.createElement("div");
       badge.className = "pref-badge" + (i === 1 ? " second" : "");
       badge.textContent = i === 0 ? "第一希望" : "第二希望";
-
       const detail = document.createElement("div");
       detail.className = "pref-detail";
-
       const dateLabel = document.createElement("div");
       dateLabel.className = "pref-date";
       dateLabel.textContent = displayDate(sel.date);
-
       const timeWrap = document.createElement("div");
       timeWrap.className = "pref-time";
-
       const tlabel = document.createElement("span");
       tlabel.className = "pref-time-label";
       tlabel.textContent = "ご希望時間：";
-
       const hSel = document.createElement("select");
       hSel.innerHTML = `<option value="">時</option>` +
         HOURS.map(h => `<option value="${h}"${sel.hour===h?" selected":""}>${h}</option>`).join("");
       hSel.onchange = e => { selections[i].hour = e.target.value; };
-
       const colon = document.createTextNode(" : ");
-
       const mSel = document.createElement("select");
       mSel.innerHTML = `<option value="">分</option>` +
         MINS.map(m => `<option value="${m}"${sel.minute===m?" selected":""}>${m}</option>`).join("");
       mSel.onchange = e => { selections[i].minute = e.target.value; };
-
       timeWrap.appendChild(tlabel);
       timeWrap.appendChild(hSel);
       timeWrap.appendChild(colon);
       timeWrap.appendChild(mSel);
-
       detail.appendChild(dateLabel);
       detail.appendChild(timeWrap);
-
       const removeBtn = document.createElement("button");
       removeBtn.className = "pref-remove";
       removeBtn.textContent = "×";
       removeBtn.onclick = () => removeSelection(i);
-
       row.appendChild(badge);
       row.appendChild(detail);
       row.appendChild(removeBtn);
@@ -592,6 +516,7 @@
   function selectMenu(key) {
     document.getElementById("menu-hand").classList.toggle("selected", key === "hand");
     document.getElementById("menu-foot").classList.toggle("selected", key === "foot");
+    document.getElementById("menu-care").classList.toggle("selected", key === "care");
     document.querySelector(`#menu-${key} input`).checked = true;
   }
 
@@ -615,31 +540,20 @@
     const s1 = selections[0];
     const s2 = selections[1];
 
-    const message =
-`ご予約をリクエストしました💅
-━━━━━━━━━━━━━━
-お名前：${name}
-メニュー：${menu.value}
-
-第一希望：${displayDate(s1.date)} ${s1.hour}:${s1.minute}
-第二希望：${displayDate(s2.date)} ${s2.hour}:${s2.minute}${note ? "\n\nご要望：" + note : ""}
-━━━━━━━━━━━━━━
-現時点で、ご予約はまだ確定していません。ご注意ください。
-ご予約確定についてはご連絡が入りますので、ご対応をお願いいたします。
-
-来店希望日の前日までにLibertyから連絡がない場合、お手数ですが直接お問い合わせください。
-`;
-
     const btn = document.querySelector(".submit-btn");
     btn.disabled = true;
     btn.textContent = "送信中…";
 
+    // ★ liff.getProfile() でユーザーIDも取得
     let lineDisplayName = "";
+    let lineUserId = "";
     try {
       const profile = await liff.getProfile();
       lineDisplayName = (profile && profile.displayName) ? profile.displayName : "";
+      lineUserId      = (profile && profile.userId)      ? profile.userId      : "";
     } catch (e) {
       lineDisplayName = "";
+      lineUserId = "";
     }
 
     try {
@@ -647,6 +561,7 @@
         sentAtIso: new Date().toISOString(),
         name,
         lineDisplayName,
+        lineUserId,        // ★ 追加：GASがお客様へpushするために使用
         menu: menu.value,
         date1: displayDate(s1.date),
         time1: `${s1.hour}:${s1.minute}`,
@@ -654,23 +569,14 @@
         time2: `${s2.hour}:${s2.minute}`,
         note
       });
-    } catch (err) {
-      console.error(err);
-      alert("予約内容の保存に失敗しました。通信環境をご確認のうえ、もう一度お試しください。");
-      btn.disabled = false;
-      btn.textContent = "予約内容を送信する";
-      return;
-    }
-
-    try {
-      await liff.sendMessages([{ type: "text", text: message }]);
+      // ★ liff.sendMessages() は廃止。GAS側でpush送信するため不要
       document.getElementById("formArea").style.display    = "none";
       document.getElementById("successArea").style.display = "block";
     } catch (err) {
       console.error(err);
-      alert("LINEへの送信に失敗しました。予約は記録済みです。お手数ですがサロンへ直接ご連絡ください。");
+      alert("送信に失敗しました。通信環境をご確認のうえ、もう一度お試しください。");
       btn.disabled = false;
-      btn.textContent = "予約内容を送信する";
+      btn.textContent = "予約をリクエストする";
     }
   }
 </script>
