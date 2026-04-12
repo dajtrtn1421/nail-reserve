@@ -112,8 +112,8 @@
     .cal-day.available.disabled { cursor: default; opacity: 0.4; }
     .cal-day.available.disabled:hover { background: #ebe4ef; }
     .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
-    .cal-day.selected-1 { background: #692073 !important; color: #ffffff !important; border-color: #692073 !important; }
-    .cal-day.selected-2 { background: #8e5c9e !important; color: #ffffff !important; border-color: #8e5c9e !important; }
+    .cal-day.selected-1 { background: #3b0a4a !important; color: #ffffff !important; border-color: #3b0a4a !important; }
+    .cal-day.selected-2 { background: #d94f8a !important; color: #ffffff !important; border-color: #d94f8a !important; }
     .cal-legend {
       display: flex;
       gap: 14px;
@@ -124,8 +124,8 @@
     }
     .cal-legend span { display: flex; align-items: center; gap: 4px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot-1 { background: #692073; }
-    .dot-2 { background: #8e5c9e; }
+    .dot-1 { background: #3b0a4a; }
+    .dot-2 { background: #d94f8a; }
 
     .calendar-hint {
       font-size: 13px;
@@ -148,14 +148,14 @@
     .pref-badge {
       font-size: 11px;
       font-weight: bold;
-      background: #692073;
+      background: #3b0a4a;
       color: #ffffff;
       border-radius: 4px;
       padding: 2px 7px;
       flex-shrink: 0;
       margin-top: 2px;
     }
-    .pref-badge.second { background: #8e5c9e; color: #ffffff; }
+    .pref-badge.second { background: #d94f8a; color: #ffffff; }
     .pref-detail { flex: 1; }
     .pref-date { font-weight: bold; color: #333; font-size: 13px; margin-bottom: 6px; }
     .pref-time { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
@@ -327,8 +327,8 @@
   /* ============================================================
      ★ 設定欄
   ============================================================ */
-  const LIFF_ID      = "2009776013-hbLhdRY2";
-  const GAS_URL      = "https://script.google.com/macros/s/AKfycbx_mkVKzB7cRbn2YphhYLwqSSTda63cMZQJ-_6n1VtYML-0aTTH-Sg-ml0ZabXHzDlc/exec";
+  const LIFF_ID      = "2009771743-c79xDnFL";
+  const GAS_URL      = "https://script.google.com/macros/s/AKfycbwE-BnD4cA4DljiB64v0uoBV2JjaZnX-97aSV9ICAFfw9dQeX2_2X-WEl95SwtXqps/exec";
   const SECRET_TOKEN = "nail-reserve-2026";
   /* ============================================================ */
 
@@ -534,7 +534,14 @@
     showErr("err-time", selections.length === 2 && !timeOk);
     showErr("err-menu", !menu);
 
-    if (!name || selections.length < 2 || !timeOk || !menu) return;
+    if (!name || selections.length < 2 || !timeOk || !menu) {
+      // 最初の不備項目までスクロール
+      const firstErr = document.querySelector('.error-msg[style="display: block;"]');
+      if (firstErr) {
+        firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
 
     const s1 = selections[0];
     const s2 = selections[1];
