@@ -62,7 +62,13 @@
       margin-bottom: 14px;
     }
 
-    .field { margin-bottom: 20px; }
+    .section-title .req{
+      font-size: 10px;
+    }
+
+    .field { margin-bottom: 32px; }
+
+
     .field label {
       display: block;
       font-size: 13px;
@@ -70,13 +76,6 @@
       color: #555;
       margin-bottom: 7px;
     }
-    .field label .req {
-      color: #c0516c;
-      margin-left: 4px;
-      font-size: 11px;
-      font-weight: normal;
-    }
-
     .calendar-card {
       background: white;
       border: 1.5px solid #e8ccd6;
@@ -124,7 +123,7 @@
       font-weight: bold;
     }
     .cal-day.available:hover { background: #dfd5ea; }
-    .cal-day.available.disabled { cursor: default; background: #ebe4ef; opacity: 0.4; }
+    .cal-day.available.disabled { cursor: default; opacity: 0.4; }
     .cal-day.available.disabled:hover { background: #ebe4ef; }
     .cal-day.unavailable { color: #ddd; text-decoration: line-through; font-size: 13px; }
     .cal-day.selected-1 {
@@ -289,8 +288,6 @@
     .success-screen .icon { font-size: 54px; margin-bottom: 20px; }
     .success-screen h2 { font-size: 20px; color: #692073; margin-bottom: 12px; }
     .success-screen p { font-size: 14px; color: #666; line-height: 1.9; }
-
-    .divider { border: none; border-top: 1px solid #f0e0ea; margin: 22px 0; }
   </style>
 </head>
 <body>
@@ -308,20 +305,16 @@
 <div class="form-wrap" id="formArea" style="display:none;">
 
   <div class="field">
-    <label>お名前<span class="req">必須</span></label>
+    <div class="section-title">お名前</div>
     <input type="text" id="name" placeholder="山田 花子" />
     <div class="error-msg" id="err-name">お名前を入力してください</div>
   </div>
 
-  <hr class="divider">
+
 
   <div class="section-title">ご希望日時（第一・第二希望）</div>
 
-  <p class="calendar-hint" id="calendarHint">カレンダーから希望日を2つ選んでください</p>
-  <div class="selected-display" id="selectedDisplay" style="display: none;" aria-live="polite"></div>
-
   <div class="field">
-    <label>カレンダーから選択<span class="req">必須（2つ）</span></label>
     <div class="calendar-card">
       <div class="cal-nav">
         <button onclick="changeMonth(-1)">&#8249;</button>
@@ -338,10 +331,13 @@
     <div class="error-msg" id="err-time">すべての希望日の時間を選択してください</div>
   </div>
 
-  <hr class="divider">
+  <p class="calendar-hint" id="calendarHint">希望日を選択すると、ここに表示されます</p>
+  <div class="selected-display" id="selectedDisplay" style="display: none;" aria-live="polite"></div>
+
+
 
   <div class="field">
-    <label>メニュー<span class="req">必須</span></label>
+    <div class="section-title">メニュー</div>
     <div class="menu-group">
       <label class="menu-item" id="menu-hand" onclick="selectMenu('hand')">
         <input type="radio" name="menu" value="ハンド" />
@@ -355,17 +351,15 @@
     <div class="error-msg" id="err-menu">メニューを選択してください</div>
   </div>
 
-  <hr class="divider">
+
 
   <div class="field">
-    <label>その他ご要望</label>
+    <div class="section-title">その他ご要望</div>
     <p class="calendar-hint">デザインのご要望（当日相談・画像お持ち込み等）や、お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。</p>
     <textarea id="note"></textarea>
   </div>
 
-  <button class="submit-btn" onclick="submitForm()">予約内容を送信する</button>
-  <p class="note">送信後、LINEのトーク画面に予約内容が表示されます。<br>サロンより確定のご連絡をお送りします。</p>
-
+  <button class="submit-btn" onclick="submitForm()">予約をリクエストする</button>
 </div>
 
 <div class="success-screen" id="successArea">
