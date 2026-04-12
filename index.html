@@ -182,16 +182,15 @@
       line-height: 1;
     }
 
+    .menu-group { display: flex; flex-direction: column; gap: 10px; }
     .menu-item {
-      flex: 1;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
       background: white;
       border: 1.5px solid #e8ccd6;
       border-radius: 10px;
-      padding: 14px 10px;
+      padding: 14px 16px;
       cursor: pointer;
       font-size: 15px;
       color: #555;
@@ -244,7 +243,6 @@
       text-align: center;
       padding: 70px 30px;
     }
-    .success-screen .icon { font-size: 54px; margin-bottom: 20px; }
     .success-screen h2 { font-size: 20px; color: #692073; margin-bottom: 12px; }
     .success-screen p { font-size: 14px; color: #666; line-height: 1.9; }
   </style>
@@ -294,6 +292,7 @@
   <div class="field">
     <div class="section-title">メニュー</div>
     <div class="menu-group">
+      <!-- ★ idをそれぞれ menu-hand / menu-foot / menu-care に修正 -->
       <label class="menu-item" id="menu-hand" onclick="selectMenu('hand')">
         <input type="radio" name="menu" value="ハンドジェルネイル" />
         ✋ ハンドジェルネイル ¥5,000〜
@@ -302,7 +301,7 @@
         <input type="radio" name="menu" value="フットジェルネイル" />
         🦶 フットジェルネイル ¥5,000〜
       </label>
-      <label class="menu-item" id="menu-foot" onclick="selectMenu('care')">
+      <label class="menu-item" id="menu-care" onclick="selectMenu('care')">
         <input type="radio" name="menu" value="ケア" />
         ✨ ケア ¥3,000〜
       </label>
@@ -329,7 +328,7 @@
      ★ 設定欄
   ============================================================ */
   const LIFF_ID      = "2009771743-c79xDnFL";
-  const GAS_URL      = "https://script.google.com/macros/s/AKfycbzkRahOYKNxaJUvMZuQQ_Xx3BPU1QeGqLkCSmSSPv51GxO0N-JhmHg-JMXX1Ddm6QUO/exec";
+  const GAS_URL      = "https://script.google.com/macros/s/AKfycbzEEkARCesV_Z9J_cs8kERX5Pp4HC9e1jQlj1tmxWWVgNWcmoZ2qv3LiodEoIFAMw_e/exec";
   const SECRET_TOKEN = "nail-reserve-2026";
   /* ============================================================ */
 
@@ -544,7 +543,6 @@
     btn.disabled = true;
     btn.textContent = "送信中…";
 
-    // ★ liff.getProfile() でユーザーIDも取得
     let lineDisplayName = "";
     let lineUserId = "";
     try {
@@ -561,7 +559,7 @@
         sentAtIso: new Date().toISOString(),
         name,
         lineDisplayName,
-        lineUserId,        // ★ 追加：GASがお客様へpushするために使用
+        lineUserId,
         menu: menu.value,
         date1: displayDate(s1.date),
         time1: `${s1.hour}:${s1.minute}`,
@@ -569,7 +567,6 @@
         time2: `${s2.hour}:${s2.minute}`,
         note
       });
-      // ★ liff.sendMessages() は廃止。GAS側でpush送信するため不要
       document.getElementById("formArea").style.display    = "none";
       document.getElementById("successArea").style.display = "block";
     } catch (err) {
