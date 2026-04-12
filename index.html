@@ -24,7 +24,7 @@
       padding: 0;
     }
     .header-inner {
-      padding: 28px 20px 22px;
+      padding: 16px 22px;
     }
     .header-logo {
       display: block;
@@ -34,8 +34,8 @@
       height: auto;
     }
     .header-tagline {
-      font-size: 12px;
-      margin-top: 14px;
+      font-size: 15px;
+      margin-top: 8px;
       color: #692073;
       line-height: 1.65;
       font-weight: normal;
@@ -120,10 +120,8 @@
     .cal-day.empty { visibility: hidden; }
     .cal-day.available {
       cursor: pointer;
-      background: #ebe4ef;
       color: #692073;
       font-weight: bold;
-      border: 1.5px solid #e8ccd6;
     }
     .cal-day.available:hover { background: #dfd5ea; }
     .cal-day.available.disabled { cursor: default; background: #ebe4ef; opacity: 0.4; }
@@ -379,11 +377,36 @@
 <script>
   /* ============================================================
      ★ 設定欄：ここだけ書き換えてください（3か所）
+     ・新しいシート＋新しい GAS へ移行する手順: gas/NEW-SHEET-AND-SCRIPT.txt
+     ・スクリプトひな形: gas/nail-reserve-v2.gs（デプロイ後、②を新URLに差し替え）
   ============================================================ */
   const LIFF_ID      = "2009771743-c79xDnFL";        // ① LIFF ID
-  const GAS_URL      = "https://script.google.com/macros/s/AKfycbwTqY5dVnvu_mGRM-Jj2xJnhntxHw6dqf3VDiVqVElVCrkYo4LRpzGxPJ-crdM5rsx0/exec"; // ② GASウェブアプリURL
-  const SECRET_TOKEN = "nail-reserve-2026";         // ③ GASに設定したトークンと同じ文字列
+  const GAS_URL      = "https://script.google.com/macros/s/AKfycbwTqY5dVnvu_mGRM-Jj2xJnhntxHw6dqf3VDiVqVElVCrkYo4LRpzGxPJ-crdM5rsx0/exec"; // ② GASウェブアプリURL（新デプロイ後は必ず更新）
+  const SECRET_TOKEN = "nail-reserve-2026";         // ③ nail-reserve-v2.gs の SECRET_TOKEN と同じ
   /* ============================================================ */
+
+  async function appendReservationToSheet(payload) {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        token: SECRET_TOKEN,
+        action: "appendReservation",
+        ...payload
+      })
+    });
+    const text = await res.text();
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      throw new Error("invalid_response");
+    }
+    if (json.error) {
+      throw new Error(json.error);
+    }
+  }
 
   const HOURS = ["11","12","13","14","15","16","17"];
   const MINS  = ["00","15","30","45"];
@@ -620,13 +643,41 @@
     btn.disabled = true;
     btn.textContent = "送信中…";
 
+    let lineDisplayName = "";
+    try {
+      const profile = await liff.getProfile();
+      lineDisplayName = (profile && profile.displayName) ? profile.displayName : "";
+    } catch (e) {
+      lineDisplayName = "";
+    }
+
+    try {
+      await appendReservationToSheet({
+        sentAtIso: new Date().toISOString(),
+        name,
+        lineDisplayName,
+        menu: menu.value,
+        date1: displayDate(s1.date),
+        time1: `${s1.hour}:${s1.minute}`,
+        date2: displayDate(s2.date),
+        time2: `${s2.hour}:${s2.minute}`,
+        note
+      });
+    } catch (err) {
+      console.error(err);
+      alert("予約内容の保存に失敗しました。通信環境をご確認のうえ、もう一度お試しください。");
+      btn.disabled = false;
+      btn.textContent = "予約内容を送信する";
+      return;
+    }
+
     try {
       await liff.sendMessages([{ type: "text", text: message }]);
       document.getElementById("formArea").style.display    = "none";
       document.getElementById("successArea").style.display = "block";
-    } catch(err) {
+    } catch (err) {
       console.error(err);
-      alert("送信に失敗しました。もう一度お試しください。");
+      alert("LINEへの送信に失敗しました。予約は記録済みです。お手数ですがサロンへ直接ご連絡ください。");
       btn.disabled = false;
       btn.textContent = "予約内容を送信する";
     }
