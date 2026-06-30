@@ -197,8 +197,10 @@
       transition: border-color 0.15s, background 0.15s;
       user-select: none;
     }
-    .menu-item input[type="radio"] { display: none; }
+    .menu-item input[type="radio"],
+    .menu-item input[type="checkbox"] { display: none; }
     .menu-item.selected { border-color: #692073; background: #ebe4ef; color: #692073; font-weight: bold; }
+    .menu-sub-hint { font-size: 13px; color: #666; margin: 14px 0 10px; line-height: 1.6; }
 
     input[type="text"], textarea {
       width: 100%;
@@ -291,22 +293,22 @@
 
   <div class="field">
     <div class="section-title">メニュー</div>
-    <div class="menu-group">
-      <!-- ★ idをそれぞれ menu-hand / menu-foot / menu-care に修正 -->
-      <label class="menu-item" id="menu-hand" onclick="selectMenu('hand')">
-        <input type="radio" name="menu" value="ハンドジェルネイル" />
-        ✋ ハンドジェルネイル ¥5,000〜
+    <p class="calendar-hint">ハンドかフットをお選びください</p>
+    <div class="menu-group" id="menuCategoryGroup">
+      <label class="menu-item" id="menu-cat-hand" onclick="selectMenuCategory('hand')">
+        <input type="radio" name="menuCategory" value="ハンド" />
+        ✋ ハンド
       </label>
-      <label class="menu-item" id="menu-foot" onclick="selectMenu('foot')">
-        <input type="radio" name="menu" value="フットジェルネイル" />
-        🦶 フットジェルネイル ¥5,000〜
-      </label>
-      <label class="menu-item" id="menu-care" onclick="selectMenu('care')">
-        <input type="radio" name="menu" value="ケア" />
-        ✨ ケア ¥3,000〜
+      <label class="menu-item" id="menu-cat-foot" onclick="selectMenuCategory('foot')">
+        <input type="radio" name="menuCategory" value="フット" />
+        🦶 フット
       </label>
     </div>
-    <div class="error-msg" id="err-menu">メニューを選択してください</div>
+    <div id="menuItemsSection" style="display:none;">
+      <p class="menu-sub-hint">施術メニューをお選びください（複数選択可）</p>
+      <div class="menu-group" id="menuItemsGroup"></div>
+    </div>
+    <div class="error-msg" id="err-menu">ハンドまたはフットと、施術メニューを選択してください</div>
   </div>
 
   <div class="field">
@@ -512,11 +514,69 @@
     });
   }
 
-  function selectMenu(key) {
-    document.getElementById("menu-hand").classList.toggle("selected", key === "hand");
-    document.getElementById("menu-foot").classList.toggle("selected", key === "foot");
-    document.getElementById("menu-care").classList.toggle("selected", key === "care");
-    document.querySelector(`#menu-${key} input`).checked = true;
+  const MENU_ITEMS = {
+    hand: [
+      { id: "color-gel", name: "カラージェル", price: "¥6,000〜" },
+      { id: "nail-care", name: "指先美爪ケア", price: "¥3,500" }
+    ],
+    foot: [
+      { id: "color-gel", name: "カラージェル", price: "¥5,000〜" },
+      { id: "nail-care", name: "指先美爪ケア", price: "¥3,500" },
+      { id: "sole-care", name: "足裏角質ケア", price: "¥3,500" },
+      { id: "ingrown-care", name: "巻き爪フラットケア", price: "¥3,000 / 本" }
+    ]
+  };
+
+  let selectedCategory = null;
+  let selectedItems = [];
+
+  function selectMenuCategory(cat) {
+    selectedCategory = cat;
+    selectedItems = [];
+    document.getElementById("menu-cat-hand").classList.toggle("selected", cat === "hand");
+    document.getElementById("menu-cat-foot").classList.toggle("selected", cat === "foot");
+    document.querySelector(`#menu-cat-${cat} input`).checked = true;
+    renderMenuItems(cat);
+  }
+
+  function renderMenuItems(cat) {
+    const section = document.getElementById("menuItemsSection");
+    const group = document.getElementById("menuItemsGroup");
+    section.style.display = "block";
+    group.innerHTML = "";
+    MENU_ITEMS[cat].forEach(item => {
+      const label = document.createElement("label");
+      label.className = "menu-item";
+      label.id = `menu-item-${item.id}`;
+      label.onclick = e => {
+        e.preventDefault();
+        toggleMenuItem(item.id, item.name);
+      };
+      label.innerHTML =
+        `<input type="checkbox" name="menuItem" value="${item.name}" />` +
+        `${item.name} ${item.price}`;
+      group.appendChild(label);
+    });
+  }
+
+  function toggleMenuItem(id, name) {
+    const el = document.getElementById(`menu-item-${id}`);
+    const idx = selectedItems.indexOf(name);
+    if (idx === -1) {
+      selectedItems.push(name);
+      el.classList.add("selected");
+      el.querySelector("input").checked = true;
+    } else {
+      selectedItems.splice(idx, 1);
+      el.classList.remove("selected");
+      el.querySelector("input").checked = false;
+    }
+  }
+
+  function getMenuText() {
+    if (!selectedCategory || selectedItems.length === 0) return "";
+    const catLabel = selectedCategory === "hand" ? "ハンド" : "フット";
+    return `${catLabel} ${selectedItems.join("、")}`;
   }
 
   function showErr(id, show) {
@@ -524,17 +584,17 @@
   }
 
   async function submitForm() {
-    const name   = document.getElementById("name").value.trim();
-    const menu   = document.querySelector('input[name="menu"]:checked');
-    const note   = document.getElementById("note").value.trim();
-    const timeOk = selections.length === 2 && selections.every(s => s.hour && s.minute);
+    const name    = document.getElementById("name").value.trim();
+    const menuText = getMenuText();
+    const note    = document.getElementById("note").value.trim();
+    const timeOk  = selections.length === 2 && selections.every(s => s.hour && s.minute);
 
     showErr("err-name", !name);
     showErr("err-date", selections.length < 2);
     showErr("err-time", selections.length === 2 && !timeOk);
-    showErr("err-menu", !menu);
+    showErr("err-menu", !menuText);
 
-    if (!name || selections.length < 2 || !timeOk || !menu) {
+    if (!name || selections.length < 2 || !timeOk || !menuText) {
       // 最初の不備項目までスクロール
       const firstErr = document.querySelector('.error-msg[style="display: block;"]');
       if (firstErr) {
@@ -567,7 +627,7 @@
         name,
         lineDisplayName,
         lineUserId,
-        menu: menu.value,
+        menu: menuText,
         date1: displayDate(s1.date),
         time1: `${s1.hour}:${s1.minute}`,
         date2: displayDate(s2.date),
