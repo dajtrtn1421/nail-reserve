@@ -68,8 +68,6 @@ function appendReservationRow_(data) {
 
   var sentAtCell = data.sentAtIso ? new Date(data.sentAtIso) : new Date();
   var menu = String(data.menu || '');
-  var hHand = menu === 'ハンド' ? menu : '';
-  var jFoot = menu === 'フット' ? menu : '';
 
   sheet.appendRow([
     sentAtCell,
@@ -79,9 +77,9 @@ function appendReservationRow_(data) {
     data.time1 || '',
     data.date2 || '',
     data.time2 || '',
-    hHand,
+    menu,
     '',
-    jFoot,
+    '',
     '',
     '',
     '',
@@ -183,10 +181,8 @@ function sendLineNotification() {
         messages.push(
           '予約依頼が届きました。\n\nお名前：' + bValue + '\n\nLINE名：' + cValue +
             '\n\n第１希望日：' + dValue + '\n時間：' + eValue + '\n\n第２希望日：' + fValue +
-            '\n時間：' + gValue + '\n\n🖐️：' + convertShort(hValue) + '\n\n🖐️：' + convertShort(iValue) +
-            '\n\n🦶：' + convertShort(jValue) + '\n\n🦶：' + convertShort(kValue) +
-            '\n\n巻き爪ケア：' + convertShort(lValue) + '\n\n亀裂の有無：' + convertShort(mValue) +
-            '\n\n亀裂の本数：' + nValue + '\n\nその他：' + oValue + '\n\n' + formattedDate + 'に予約がありました。'
+            '\n時間：' + gValue + '\n\nメニュー：' + hValue +
+            '\n\nその他：' + oValue + '\n\n' + formattedDate + 'に予約がありました。'
         );
       }
     }
