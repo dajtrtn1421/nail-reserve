@@ -219,6 +219,22 @@
 
     .error-msg { color: #c0516c; font-size: 12px; margin-top: 6px; display: none; }
 
+    .photo-area { margin-top: 14px; }
+    .photo-btn.disabled { opacity: 0.4; pointer-events: none; }
+    .photo-count { display: block; font-size: 12px; color: #888; margin-top: 6px; }
+    .photo-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .photo-item { position: relative; width: 84px; height: 84px; }
+    .photo-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: 8px; border: 1.5px solid #e8ccd6; background: white;
+    }
+    .photo-remove {
+      position: absolute; top: -8px; right: -8px;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: none; background: #692073; color: #fff;
+      font-size: 14px; line-height: 24px; text-align: center; cursor: pointer; padding: 0;
+    }
+
     .submit-btn {
       display: block;
       width: 100%;
@@ -315,6 +331,13 @@
     <div class="section-title">その他ご要望</div>
     <p class="calendar-hint">お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。<br>デザインのご指定ある方は1週間前までにLINE、DMなどでイメージ画像をお送りください。</p>
     <textarea id="note"></textarea>
+    <div class="photo-area">
+      <label class="menu-item photo-btn" id="photoBtn" for="photoInput">📷 ご希望デザインの画像を追加する</label>
+      <span class="photo-count" id="photoCount">最大3枚・1枚15MBまで</span>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none;" />
+      <div class="photo-previews" id="photoPreviews"></div>
+      <div class="error-msg" id="err-photo"></div>
+    </div>
   </div>
 
   <button class="submit-btn" onclick="submitForm()">予約をリクエストする</button>
@@ -379,6 +402,16 @@
     document.getElementById("formArea").style.display    = "block";
   }
 
+  /* 予約可能な最短日（日本時間で判定）
+     ・17:00より前 → 翌日から予約可能
+     ・17:00以降   → 翌々日から予約可能 */
+  const CUTOFF_HOUR = 17;
+  function getMinSelectableDate() {
+    const jst = new Date(Date.now() + 9 * 60 * 60 * 1000); // UTC → JST
+    const addDays = jst.getUTCHours() >= CUTOFF_HOUR ? 2 : 1;
+    return new Date(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate() + addDays);
+  }
+
   function renderCalendar() {
     document.getElementById("calTitle").textContent = `${currentYear}年 ${currentMonth + 1}月`;
     const grid = document.getElementById("calGrid");
@@ -393,7 +426,7 @@
     const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date(); today.setHours(0,0,0,0);
-    const minDate = new Date(today); minDate.setDate(today.getDate() + 2);
+    const minDate = getMinSelectableDate();
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement("div");
       el.className = "cal-day empty";
@@ -579,6 +612,98 @@
     return `${catLabel} ${selectedItems.join("、")}`;
   }
 
+  /* ===== 画像添付（最大3枚・長辺1280pxに縮小してJPEG化） ===== */
+  const MAX_PHOTOS = 3;
+  let photos = []; // JPEGのdata URL
+
+  /* ---- 画像サイズの制限 ----
+     ・元画像：15MBまで（それ以上は読み込まない）
+     ・送信する画像：約1MB以下になるまで段階的に縮小・再圧縮
+     ・画像以外のファイルは不可 */
+  const MAX_INPUT_BYTES   = 15 * 1024 * 1024;
+  const MAX_OUTPUT_LENGTH = 1400000; // 変換後data URLの文字数（約1MB）
+  const COMPRESS_STEPS    = [[1280, 0.8], [1280, 0.65], [1024, 0.6], [800, 0.5]]; // [長辺px, 画質]
+
+  function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      if (!file.type || !file.type.startsWith("image/")) return reject(new Error("not_image"));
+      if (file.size > MAX_INPUT_BYTES) return reject(new Error("too_large"));
+
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        for (const [maxSize, quality] of COMPRESS_STEPS) {
+          const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          if (dataUrl.length <= MAX_OUTPUT_LENGTH) return resolve(dataUrl);
+        }
+        reject(new Error("too_large"));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image_load_failed")); };
+      img.src = url;
+    });
+  }
+
+  function setPhotoError(msg) {
+    const el = document.getElementById("err-photo");
+    el.textContent = msg || "";
+    el.style.display = msg ? "block" : "none";
+  }
+
+  function renderPhotos() {
+    const wrap = document.getElementById("photoPreviews");
+    wrap.innerHTML = "";
+    photos.forEach((dataUrl, i) => {
+      const item = document.createElement("div");
+      item.className = "photo-item";
+      const img = document.createElement("img");
+      img.src = dataUrl;
+      img.alt = `添付画像${i + 1}`;
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "photo-remove";
+      rm.textContent = "×";
+      rm.onclick = () => { photos.splice(i, 1); setPhotoError(""); renderPhotos(); };
+      item.appendChild(img);
+      item.appendChild(rm);
+      wrap.appendChild(item);
+    });
+    const full = photos.length >= MAX_PHOTOS;
+    document.getElementById("photoBtn").classList.toggle("disabled", full);
+    document.getElementById("photoCount").textContent = `${photos.length} / ${MAX_PHOTOS}枚（1枚15MBまで）`;
+  }
+
+  document.getElementById("photoInput").addEventListener("change", async e => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    setPhotoError("");
+    for (const f of files) {
+      if (photos.length >= MAX_PHOTOS) {
+        setPhotoError(`画像は最大${MAX_PHOTOS}枚までです`);
+        break;
+      }
+      try {
+        photos.push(await resizeImage(f));
+      } catch (err) {
+        if (err.message === "too_large") {
+          setPhotoError("画像のサイズが大きすぎます（1枚15MBまで）");
+        } else if (err.message === "not_image") {
+          setPhotoError("画像ファイルをお選びください");
+        } else {
+          setPhotoError("読み込めない画像がありました（JPEG / PNG をお選びください）");
+        }
+      }
+    }
+    renderPhotos();
+  });
+
   function showErr(id, show) {
     document.getElementById(id).style.display = show ? "block" : "none";
   }
@@ -608,7 +733,7 @@
 
     const btn = document.querySelector(".submit-btn");
     btn.disabled = true;
-    btn.textContent = "送信中…";
+    btn.textContent = photos.length ? "画像を送信中…（少しお待ちください）" : "送信中…";
 
     let lineDisplayName = "";
     let lineUserId = "";
@@ -632,7 +757,8 @@
         time1: `${s1.hour}:${s1.minute}`,
         date2: displayDate(s2.date),
         time2: `${s2.hour}:${s2.minute}`,
-        note
+        note,
+        photos
       });
       document.getElementById("formArea").style.display    = "none";
       document.getElementById("successArea").style.display = "block";
