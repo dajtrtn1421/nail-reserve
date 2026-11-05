@@ -331,7 +331,8 @@
     <div class="section-title">その他ご要望</div>
     <p class="calendar-hint">お悩み、事前に伝えておきたいことなどございましたらご記入をお願いします。<br>デザインのご指定ある方は1週間前までにLINE、DMなどでイメージ画像をお送りください。</p>
     <textarea id="note"></textarea>
-    <div class="photo-area">
+    <p class="calendar-hint" id="photoNote" style="margin-top:12px;">※カラージェルをお選びの方は、ご希望デザインの画像を添付できます。</p>
+    <div class="photo-area" id="photoArea" style="display:none;">
       <label class="menu-item photo-btn" id="photoBtn" for="photoInput">📷 ご希望デザインの画像を追加する</label>
       <span class="photo-count" id="photoCount">最大3枚・1枚15MBまで</span>
       <input type="file" id="photoInput" accept="image/*" multiple style="display:none;" />
@@ -376,6 +377,14 @@
 
   const HOURS = ["11","12","13","14","15","16","17"];
   const MINS  = ["00","15","30","45"];
+
+  /* 最終受付は17:00。17時台は「00分」のみ選べる */
+  const LAST_HOUR = "17";
+  function minutesFor(hour) { return hour === LAST_HOUR ? ["00"] : MINS; }
+  function fillMinuteOptions(mSel, hour, current) {
+    mSel.innerHTML = `<option value="">分</option>` +
+      minutesFor(hour).map(m => `<option value="${m}"${current === m ? " selected" : ""}>${m}</option>`).join("");
+  }
   const DAYS  = ["日","月","火","水","木","金","土"];
 
   let availableDates = [];
@@ -524,12 +533,16 @@
       const hSel = document.createElement("select");
       hSel.innerHTML = `<option value="">時</option>` +
         HOURS.map(h => `<option value="${h}"${sel.hour===h?" selected":""}>${h}</option>`).join("");
-      hSel.onchange = e => { selections[i].hour = e.target.value; };
       const colon = document.createTextNode(" : ");
       const mSel = document.createElement("select");
-      mSel.innerHTML = `<option value="">分</option>` +
-        MINS.map(m => `<option value="${m}"${sel.minute===m?" selected":""}>${m}</option>`).join("");
+      fillMinuteOptions(mSel, sel.hour, sel.minute);
       mSel.onchange = e => { selections[i].minute = e.target.value; };
+      hSel.onchange = e => {
+        selections[i].hour = e.target.value;
+        // 選べない分（例：17時の15分）が選択済みだった場合は未選択に戻す
+        if (!minutesFor(selections[i].hour).includes(selections[i].minute)) selections[i].minute = "";
+        fillMinuteOptions(mSel, selections[i].hour, selections[i].minute);
+      };
       timeWrap.appendChild(tlabel);
       timeWrap.appendChild(hSel);
       timeWrap.appendChild(colon);
@@ -570,6 +583,7 @@
     document.getElementById("menu-cat-foot").classList.toggle("selected", cat === "foot");
     document.querySelector(`#menu-cat-${cat} input`).checked = true;
     renderMenuItems(cat);
+    updatePhotoVisibility();
   }
 
   function renderMenuItems(cat) {
@@ -604,6 +618,7 @@
       el.classList.remove("selected");
       el.querySelector("input").checked = false;
     }
+    updatePhotoVisibility();
   }
 
   function getMenuText() {
@@ -650,6 +665,15 @@
       img.src = url;
     });
   }
+
+  /* 画像添付は、ハンド・フットのどちらでも「カラージェル」を選んだ方のみ */
+  function hasColorGel() { return selectedItems.includes("カラージェル"); }
+  function updatePhotoVisibility() {
+    const ok = hasColorGel();
+    document.getElementById("photoArea").style.display = ok ? "block" : "none";
+    document.getElementById("photoNote").style.display = ok ? "none" : "block";
+  }
+  updatePhotoVisibility();
 
   function setPhotoError(msg) {
     const el = document.getElementById("err-photo");
@@ -712,7 +736,7 @@
     const name    = document.getElementById("name").value.trim();
     const menuText = getMenuText();
     const note    = document.getElementById("note").value.trim();
-    const timeOk  = selections.length === 2 && selections.every(s => s.hour && s.minute);
+    const timeOk  = selections.length === 2 && selections.every(s => s.hour && s.minute && minutesFor(s.hour).includes(s.minute));
 
     showErr("err-name", !name);
     showErr("err-date", selections.length < 2);
@@ -730,10 +754,11 @@
 
     const s1 = selections[0];
     const s2 = selections[1];
+    const photosToSend = hasColorGel() ? photos : [];
 
     const btn = document.querySelector(".submit-btn");
     btn.disabled = true;
-    btn.textContent = photos.length ? "画像を送信中…（少しお待ちください）" : "送信中…";
+    btn.textContent = photosToSend.length ? "画像を送信中…（少しお待ちください）" : "送信中…";
 
     let lineDisplayName = "";
     let lineUserId = "";
@@ -758,7 +783,7 @@
         date2: displayDate(s2.date),
         time2: `${s2.hour}:${s2.minute}`,
         note,
-        photos
+        photos: photosToSend
       });
       document.getElementById("formArea").style.display    = "none";
       document.getElementById("successArea").style.display = "block";
