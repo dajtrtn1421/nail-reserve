@@ -143,6 +143,8 @@
       margin-bottom: 14px;
       font-size: 13px;
     }
+    .pref-slot { margin-bottom: 18px; }
+    .pref-slot .selected-display { margin-bottom: 0; }
     .pref-row { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; }
     .pref-row + .pref-row { border-top: 1px solid #f0e0ea; }
     .pref-badge {
@@ -285,7 +287,7 @@
     <div class="error-msg" id="err-name">お名前を入力してください</div>
   </div>
 
-  <div class="section-title">ご希望日時（第一・第二希望）</div>
+  <div class="section-title">日付</div>
 
   <div class="field">
     <div class="calendar-card">
@@ -300,12 +302,21 @@
         <span><span class="dot dot-2"></span>第二希望</span>
       </div>
     </div>
-    <div class="error-msg" id="err-date">第一・第二希望の日付を2つ選択してください</div>
-    <div class="error-msg" id="err-time">すべての希望日の時間を選択してください</div>
   </div>
 
-  <p class="calendar-hint" id="calendarHint">希望日を選択すると、ここに表示されます</p>
-  <div class="selected-display" id="selectedDisplay" style="display:none;" aria-live="polite"></div>
+  <div class="section-title">第一希望</div>
+  <div class="pref-slot">
+    <p class="calendar-hint" id="slotHint-0">日付を選択してください</p>
+    <div class="selected-display" id="slotDisplay-0" style="display:none;" aria-live="polite"></div>
+    <div class="error-msg" id="err-slot-0"></div>
+  </div>
+
+  <div class="section-title">第二希望</div>
+  <div class="pref-slot">
+    <p class="calendar-hint" id="slotHint-1">日付を選択してください</p>
+    <div class="selected-display" id="slotDisplay-1" style="display:none;" aria-live="polite"></div>
+    <div class="error-msg" id="err-slot-1"></div>
+  </div>
 
   <div class="field">
     <div class="section-title">メニュー</div>
@@ -503,28 +514,60 @@
     renderSelected();
   }
 
-  function renderSelected() {
-    const hint = document.getElementById("calendarHint");
-    const area = document.getElementById("selectedDisplay");
-    area.innerHTML = "";
-    if (selections.length === 0) {
-      hint.style.display = "block";
-      area.style.display = "none";
-      return;
+  /* 第一希望（枠0）・第二希望（枠1）ごとの入力チェック
+     ・日付が未選択            → 日付のメッセージ
+     ・日付は選択済み・時間が未選択 → 時間のメッセージ */
+  let slotErrorsActive = false; // 送信ボタンを一度押したあとは、入力に合わせてエラーを更新する
+  function slotErrorMessage(i) {
+    const sel = selections[i];
+    if (!sel) return "日付をカレンダーから選択してください";
+    if (!sel.hour || !sel.minute || !minutesFor(sel.hour).includes(sel.minute)) {
+      return "ご希望時間（時・分）を選択してください";
     }
-    hint.style.display = "none";
-    area.style.display = "block";
-    selections.forEach((sel, i) => {
+    return "";
+  }
+  function updateSlotErrors() {
+    for (let i = 0; i < 2; i++) {
+      const el = document.getElementById(`err-slot-${i}`);
+      const msg = slotErrorsActive ? slotErrorMessage(i) : "";
+      el.textContent = msg;
+      el.style.display = msg ? "block" : "none";
+      // 日付が未選択の枠は、エラー表示中は案内文の代わりにエラーを出す
+      if (!selections[i]) document.getElementById(`slotHint-${i}`).style.display = msg ? "none" : "block";
+    }
+  }
+
+  /* 第一希望（枠0）・第二希望（枠1）それぞれに、選んだ日付と時間の選択欄を表示 */
+  function renderSelected() {
+    for (let i = 0; i < 2; i++) {
+      const hint = document.getElementById(`slotHint-${i}`);
+      const area = document.getElementById(`slotDisplay-${i}`);
+      area.innerHTML = "";
+      const sel = selections[i];
+
+      if (!sel) {
+        hint.style.display = "block";
+        area.style.display = "none";
+        continue;
+      }
+      hint.style.display = "none";
+      area.style.display = "block";
+
       const row = document.createElement("div");
       row.className = "pref-row";
-      const badge = document.createElement("div");
-      badge.className = "pref-badge" + (i === 1 ? " second" : "");
-      badge.textContent = i === 0 ? "第一希望" : "第二希望";
+
       const detail = document.createElement("div");
       detail.className = "pref-detail";
+
+      // カレンダーの凡例と同じ色のマーク + 日付
       const dateLabel = document.createElement("div");
       dateLabel.className = "pref-date";
-      dateLabel.textContent = displayDate(sel.date);
+      const dot = document.createElement("span");
+      dot.className = "dot " + (i === 0 ? "dot-1" : "dot-2");
+      dot.style.marginRight = "6px";
+      dateLabel.appendChild(dot);
+      dateLabel.appendChild(document.createTextNode(displayDate(sel.date)));
+
       const timeWrap = document.createElement("div");
       timeWrap.className = "pref-time";
       const tlabel = document.createElement("span");
@@ -536,28 +579,32 @@
       const colon = document.createTextNode(" : ");
       const mSel = document.createElement("select");
       fillMinuteOptions(mSel, sel.hour, sel.minute);
-      mSel.onchange = e => { selections[i].minute = e.target.value; };
+      mSel.onchange = e => { selections[i].minute = e.target.value; updateSlotErrors(); };
       hSel.onchange = e => {
         selections[i].hour = e.target.value;
         // 選べない分（例：17時の15分）が選択済みだった場合は未選択に戻す
         if (!minutesFor(selections[i].hour).includes(selections[i].minute)) selections[i].minute = "";
         fillMinuteOptions(mSel, selections[i].hour, selections[i].minute);
+        updateSlotErrors();
       };
       timeWrap.appendChild(tlabel);
       timeWrap.appendChild(hSel);
       timeWrap.appendChild(colon);
       timeWrap.appendChild(mSel);
+
       detail.appendChild(dateLabel);
       detail.appendChild(timeWrap);
+
       const removeBtn = document.createElement("button");
       removeBtn.className = "pref-remove";
       removeBtn.textContent = "×";
       removeBtn.onclick = () => removeSelection(i);
-      row.appendChild(badge);
+
       row.appendChild(detail);
       row.appendChild(removeBtn);
       area.appendChild(row);
-    });
+    }
+    updateSlotErrors();
   }
 
   const MENU_ITEMS = {
@@ -736,14 +783,14 @@
     const name    = document.getElementById("name").value.trim();
     const menuText = getMenuText();
     const note    = document.getElementById("note").value.trim();
-    const timeOk  = selections.length === 2 && selections.every(s => s.hour && s.minute && minutesFor(s.hour).includes(s.minute));
 
     showErr("err-name", !name);
-    showErr("err-date", selections.length < 2);
-    showErr("err-time", selections.length === 2 && !timeOk);
+    slotErrorsActive = true;
+    updateSlotErrors();
+    const slotsOk = !slotErrorMessage(0) && !slotErrorMessage(1);
     showErr("err-menu", !menuText);
 
-    if (!name || selections.length < 2 || !timeOk || !menuText) {
+    if (!name || !slotsOk || !menuText) {
       // 最初の不備項目までスクロール
       const firstErr = document.querySelector('.error-msg[style="display: block;"]');
       if (firstErr) {
